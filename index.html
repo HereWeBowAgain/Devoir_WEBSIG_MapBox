@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8" />
+    <title>Itinéraire de randonnée Les Clarionds - Tête de Balaour</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.js"></script>
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.4.1/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.min.js"></script>
+    <link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff; /* Couleur de fond blanche */
+        }
+        h1 {
+            color: #0000ff; /* Couleur du titre en bleu */
+            text-align: center;
+        }
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: relative;
+            padding: 10px;
+        }
+        .pdf-link {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            z-index: 10; /* Assure que le lien est au-dessus des autres éléments */
+        }
+        .pdf-link img {
+            width: 100px;
+            height: 100px;
+            cursor: pointer;
+        }
+        .header-logo {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+        .header-logo img {
+            width: 100px;
+            height: 100px;
+        }
+        .header-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            position: relative;
+        }
+        .header-center img {
+            width: 100px;
+            height: 100px;
+        }
+        .map-container {
+            position: relative;
+            width: 100%;
+            height: 750px;
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        #map {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+        .map-overlay-2 {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            padding: 10px;
+            font-family: Arial, sans-serif;
+        }
+        .map-overlay-inner {
+            max-width: 200px;
+        }
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+        }
+        .footer-logo img {
+            width: 50px;
+            height: 50px;
+        }
+    </style>
+</head>
+<body>
+<header class="header-container">
+    <div class="pdf-link">
+        <a href="BRA.pdf" target="_blank">
+            <img src="BRA.png" alt="BRA" title="Cliquer ici pour voir le BRA du 31 Janvier 2025">
+        </a>
+    </div>
+    <div class="header-center">
+        <img src="etugeo.png" alt="logoEtugeo">
+    </div>
+    <div class="header-logo">
+        <a href="https://iut.univ-amu.fr/fr/sites-geographiques/digne">
+            <img src="amU.png" alt="amU Logo" title="Cliquer ici pour visiter le site de l'IUT">
+        </a>
+    </div>
+</header>
+<h1>Itinéraire de randonnée Les Clarionds - Tête de Balaour</h1>
+<main>
+    <section>
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="map-overlay-2 top">
+                <div class="map-overlay-inner">
+                    <fieldset>
+                        <label class="categoryLabel">Légende</label>
+                        <div>
+                            <label class="categoryLabel">Itinéraires</label>
+                            <div>
+                                <input type="checkbox" id="realiseCB" value="realise" onchange="switchLayer('realise')" checked />
+                                <label for="realiseCB">Réalisé</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="optimisteCB" value="optimiste" onchange="switchLayer('optimiste')" checked />
+                                <label for="optimisteCB">Optimiste</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="modereCB" value="modere" onchange="switchLayer('modere')" checked />
+                                <label for="modereCB">Modéré</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="pessimisteCB" value="pessimiste" onchange="switchLayer('pessimiste')" checked />
+                                <label for="pessimisteCB">Pessimiste</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="categoryLabel">Points</label>
+                            <div>
+                                <input type="checkbox" id="refugeCB" value="refuge" onchange="switchLayer('refuge')" checked />
+                                <label for="refugeCB">Refuge</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="hydrologieCB" value="hydrologie" onchange="switchLayer('hydrologie')" checked />
+                                <label for="hydrologieCB">Cours d'eau</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="sommetsCB" value="sommets" onchange="switchLayer('sommets')" checked />
+                                <label for="sommetsCB">Sommets</label>
+                            </div>
+                            <div>
+                                <input type="checkbox" id="pointsCB" value="points" onchange="switchLayer('points')" checked />
+                                <label for="pointsCB">Points d'intérêt</label>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="categoryLabel">Couche</label>
+                            <div>
+                                <input type="checkbox" id="penteCB" value="pente" onchange="switchLayer('pente')" checked />
+                                <label for="penteCB">Dénivelé</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+<footer class="footer-container">
+    <h3>© ALGHISI - DENTY - HAQUART , Randonnée du 31/01/2025</h3>
+</footer>
+<script>
+    mapboxgl.accessToken = 'pk.eyJ1IjoiZGFibzIyIiwiYSI6ImNremltNXR2aTMxaG0ydW8xYmcwOGU3YjUifQ.33TjJKovMQpZ1dkC0S9K3Q';
+    var map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/satellite-streets-v12', // Utilise le style satellite-streets-v12
+        center: [6.50, 44.34],
+        zoom: 12,
+        pitch: 60, // Ajuste l'angle pour une vue 3D
+        bearing: -17.6, // Orientation de la carte
+        antialias: true // Pour un rendu plus fluide
+    });
+
+    function switchLayer(layerName) {
+        var visibility = document.getElementById(layerName + "CB").checked ? 'visible' : 'none';
+        if (map.getLayer(layerName)) {
+            map.setLayoutProperty(layerName, 'visibility', visibility);
+        }
+    }
+
+    map.on('style.load', function () {
+        // Ajouter une source de terrain pour le relief
+        map.addSource('mapbox-dem', {
+            'type': 'raster-dem',
+            'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+            'tileSize': 512,
+            'maxzoom': 14
+        });
+
+        // Ajouter un ombrage pour simuler le relief
+        map.setTerrain({
+            'source': 'mapbox-dem',
+            'exaggeration': 1.5 // Augmente l'exagération pour un relief plus prononcé
+        });
+
+        map.addSource('pente', {
+            'type': 'raster',
+            'url': 'mapbox://dabo22.4amfe751'
+        });
+        map.addLayer({
+            'id': 'pente',
+            'source': 'pente',
+            'type': 'raster'
+        });
+
+        map.addSource('mapbox-streets-v8', {
+            type: 'vector',
+            url: 'mapbox://mapbox.mapbox-streets-v8'
+        });
+        map.addLayer({
+            "id": "hydrologie",
+            "type": "line",
+            "source": "mapbox-streets-v8",
+            "source-layer": "waterway",
+            'layout': {'visibility': 'visible'},
+            "paint": {"line-color": "#1b92aa", "line-width": 5}
+        });
+
+        map.addSource('sommets', {
+            type: 'vector',
+            url: 'mapbox://dabo22.d2pqsj58'
+        });
+        map.loadImage("https://i.imgur.com/sRzmTfg.png", function (error, image) {
+            if (error) throw error;
+            map.addImage("sommet", image);
+            map.addLayer({
+                'id': 'sommets',
+                'type': 'symbol',
+                'source': 'sommets',
+                "filter": ["any",["==", "Type_POI", "Sommet"]],
+                'source-layer': 'POI-4phbcv',
+                'layout': {
+                    'icon-image': "sommet",
+                    'icon-size': 0.03,
+                    'icon-allow-overlap': true,
+                    'visibility': 'visible'
+                }
+            });
+        });
+
+        map.addSource('refuge', {
+            type: 'vector',
+            url: 'mapbox://dabo22.d2pqsj58'
+        });
+        map.loadImage("https://i.imgur.com/Eyhfio2.png", function (error, image) {
+            if (error) throw error;
+            map.addImage("refuge", image);
+            map.addLayer({
+                'id': 'refuge',
+                'type': 'symbol',
+                'source': 'refuge',
+                "filter": ["any",["==", "Type_POI", "Départ"]],
+                'source-layer': 'POI-4phbcv',
+                'layout': {
+                    'icon-image': "refuge",
+                    'icon-size': 0.3,
+                    'icon-allow-overlap': true,
+                    'visibility': 'visible'
+                }
+            });
+        });
+
+        map.addSource('optimiste', {
+            type: 'vector',
+            url: 'mapbox://dabo22.9s8ao4ju'
+        });
+        map.addLayer({
+            'id': 'optimiste',
+            'type': 'line',
+            'source': 'optimiste',
+            'filter': ["all", ["==", "Name", "Optimiste"]],
+            'source-layer': 'scenarios-5azp2k',
+            'layout': {
+                'visibility': 'visible',
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-width': 3,
+                'line-color': "#00ff00"
+            }
+        });
+
+        map.addSource('modere', {
+            type: 'vector',
+            url: 'mapbox://dabo22.9s8ao4ju'
+        });
+        map.addLayer({
+            'id': 'modere',
+            'type': 'line',
+            'source': 'modere',
+            'filter': ["all", ["==", "Name", "Modere"]],
+            'source-layer': 'scenarios-5azp2k',
+            'layout': {
+                'visibility': 'visible',
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-width': 3,
+                'line-color': "#ff7b00"
+            }
+        });
+
+        map.addSource('pessimiste', {
+            type: 'vector',
+            url: 'mapbox://dabo22.9s8ao4ju'
+        });
+        map.addLayer({
+            'id': 'pessimiste',
+            'type': 'line',
+            'source': 'pessimiste',
+            'filter': ["all", ["==", "Name", "Pessimiste"]],
+            'source-layer': 'scenarios-5azp2k',
+            'layout': {
+                'visibility': 'visible',
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-width': 3,
+                'line-color': "#ff0000"
+            }
+        });
+
+        map.addSource('realise', {
+            type: 'vector',
+            url: 'mapbox://dabo22.chrdwniy'
+        });
+        map.addLayer({
+            'id': 'realise',
+            'type': 'line',
+            'source': 'realise',
+            'source-layer': 'parcours_realise-1e7aif',
+            'layout': {
+                'visibility': 'visible',
+                'line-join': 'round',
+                'line-cap': 'round'
+            },
+            'paint': {
+                'line-width': 3,
+                'line-color': "#ffffff"
+            }
+        });
+
+        // Ajouter la nouvelle couche de points avec icône personnalisée
+        map.loadImage("https://i.imgur.com/svdx0aJ.png", function (error, image) {
+            if (error) throw error;
+            map.addImage("point-icon", image);
+
+            map.addSource('points', {
+                type: 'geojson',
+                data: {
+                    "type": "FeatureCollection",
+                    "features": [
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nom": "Cours d'Eau",
+                                "image": "https://i.imgur.com/ryMZDvL.jpg"
+                            },
+                            "geometry": {
+                                "coordinates": [
+                                    6.5130689,
+                                    44.3415683
+                                ],
+                                "type": "Point"
+                            },
+                            "id": 0
+                        },
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nom": "POI 1",
+                                "image": "https://i.imgur.com/ApdLwre.jpg"
+                            },
+                            "geometry": {
+                                "coordinates": [
+                                    6.512024,
+                                    44.34332919972223
+                                ],
+                                "type": "Point"
+                            },
+                            "id": 2
+                        },
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nom": "POI 2",
+                                "image": "https://i.imgur.com/HLwk2Td.jpg"
+                            },
+                            "geometry": {
+                                "coordinates": [
+                                    6.512976,
+                                    44.33894959972223
+                                ],
+                                "type": "Point"
+                            },
+                            "id": 3
+                        },
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nom": "Cabane du Plan de Gautier",
+                                "image": "https://i.imgur.com/xN4GhP3.jpg"
+                            },
+                            "geometry": {
+                                "coordinates": [
+                                    6.509465399722222,
+                                    44.327367099722224
+                                ],
+                                "type": "Point"
+                            },
+                            "id": 4
+                        },
+                        {
+                            "type": "Feature",
+                            "properties": {
+                                "nom": "Quand faut y aller...",
+                                "image": "https://i.imgur.com/r8M0ZVR.jpg"
+                            },
+                            "geometry": {
+                                "coordinates": [
+                                    6.5148403,
+                                    44.339326499722226
+                                ],
+                                "type": "Point"
+                            },
+                            "id": 5
+                        }
+                    ]
+                }
+            });
+
+            map.addLayer({
+                'id': 'points',
+                'type': 'symbol',
+                'source': 'points',
+                'layout': {
+                    'icon-image': 'point-icon',
+                    'icon-size': 0.1,
+                    'icon-allow-overlap': true,
+                    'visibility': 'visible'
+                }
+            });
+        });
+
+        var popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
+
+        map.on('mousemove', function(e) {
+            var features = map.queryRenderedFeatures(e.point, { layers: ['sommets', 'refuge', 'points'] });
+            map.getCanvas().style.cursor = (features.length) ? 'pointer' : '';
+            if (!features.length) {
+                popup.remove();
+                return;
+            }
+            var feature = features[0];
+            var description = feature.properties.nom || feature.properties.Type_POI;
+            var imageUrl = feature.properties.image;
+
+            // Ajouter une image spécifique pour le point de départ "Refuge"
+            if (feature.properties.Type_POI === "Départ") {
+                imageUrl = "https://i.imgur.com/ejU7o6L.jpg";
+            }
+
+            var popupContent = description;
+            if (imageUrl) {
+                popupContent += '<br><img src="' + imageUrl + '" width="150">';
+            }
+            popup.setLngLat(feature.geometry.coordinates)
+                .setHTML(popupContent)
+                .addTo(map);
+        });
+
+        map.on('mouseleave', 'sommets', function() {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        map.on('mouseleave', 'points', function() {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        // Ajouter l'animation radar
+        const layers = [
+            { id: "dabo22.6mwwdr89", name: "tp_step_0" },
+            { id: "dabo22.1zoavg4h", name: "tp_step_1" },
+            { id: "dabo22.ai8q30u9", name: "tp_step_2" },
+            { id: "dabo22.dhswtaz0", name: "tp_step_3" },
+            { id: "dabo22.bxtxde76", name: "tp_step_4" },
+            { id: "dabo22.49kj3y7y", name: "tp_step_5" }
+        ];
+
+        let currentLayerIndex = 0;
+
+        layers.forEach((layer, index) => {
+            map.addSource(layer.name, {
+                type: 'raster',
+                url: `mapbox://${layer.id}`,
+                tileSize: 256
+            });
+
+            map.addLayer({
+                id: layer.name,
+                type: 'raster',
+                source: layer.name,
+                layout: { visibility: index === 0 ? 'visible' : 'none' },
+                paint: { 'raster-opacity': 1 }
+            });
+        });
+
+        setInterval(() => {
+            const prevLayer = layers[currentLayerIndex].name;
+            currentLayerIndex = (currentLayerIndex + 1) % layers.length;
+            const nextLayer = layers[currentLayerIndex].name;
+
+            map.setLayoutProperty(prevLayer, 'visibility', 'none');
+            map.setLayoutProperty(nextLayer, 'visibility', 'visible');
+        }, 500);
+    });
+
+    var nav = new mapboxgl.NavigationControl();
+    map.addControl(nav, 'top-left');
+
+    map.addControl(new mapboxgl.ScaleControl({
+        maxWidth: 120,
+        unit: 'metric'
+    }));
+
+    const geocoder = new MapboxGeocoder({
+        accessToken: mapboxgl.accessToken,
+        language: 'fr-FR',
+        mapboxgl: mapboxgl
+    });
+    map.addControl(geocoder, 'bottom-right');
+</script>
+</body>
+</html>
